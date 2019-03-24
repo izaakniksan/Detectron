@@ -51,6 +51,9 @@ import utils.c2
 import utils.env as envu
 import utils.net as nu
 
+# nvprof
+from numba import cuda
+
 utils.c2.import_contrib_ops()
 utils.c2.import_detectron_ops()
 
@@ -106,6 +109,11 @@ def parse_args():
         default=3,
         type=int
     )
+    parser.add_argument(
+        '--profile', 
+        action='store_true'
+        help='Used to enable nvprof profiling'
+    )
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -122,6 +130,9 @@ def main():
     logger = setup_logging(__name__)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     args = parse_args()
+    PROFILE=args.profile
+    if PROFILE==True:
+        print('nvprof profiling enabled')
     logger.info('Called with args:')
     logger.info(args)
     if args.cfg_file is not None:
@@ -169,6 +180,15 @@ def train_model(args):
         training_stats.UpdateIterStats()
         training_stats.LogIterStats(cur_iter, lr)
 
+        if cur_iter == cfg.SOLVER.MAX_ITER//2 and PROFILE:
+                print('Starting profiling for 100 iterations.')
+                cuda.profile_start()
+
+        if cur_iter == cfg.SOLVER.MAX_ITER//2+100 and PROFILE:
+                print('Profiling completed, stopping profiling and exiting.')
+                cuda.profile_stop()
+                exit()
+        
         # COCO has 118k images
         if (cur_iter + 1) % 59000 == 0 and cur_iter > start_iter:
             checkpoints[cur_iter] = os.path.join(
