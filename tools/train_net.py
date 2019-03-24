@@ -111,6 +111,7 @@ def parse_args():
     )
     parser.add_argument(
         '--profile', 
+        help='Used to trigger profiling with nvprof',
         action='store_true'
     )
     if len(sys.argv) == 1:
@@ -129,6 +130,7 @@ def main():
     logger = setup_logging(__name__)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     args = parse_args()
+    global PROFILE
     PROFILE=args.profile
     if PROFILE==True:
         print('nvprof profiling enabled')
@@ -184,9 +186,8 @@ def train_model(args):
                 cuda.profile_start()
 
         if cur_iter == cfg.SOLVER.MAX_ITER//2+100 and PROFILE:
-                print('Profiling completed, stopping profiling and exiting.')
+                print('Profiling completed, stopping profiling and continuing training.')
                 cuda.profile_stop()
-                exit()
         
         # COCO has 118k images
         if (cur_iter + 1) % 59000 == 0 and cur_iter > start_iter:
