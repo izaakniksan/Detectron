@@ -112,7 +112,6 @@ def parse_args():
     parser.add_argument(
         '--profile', 
         action='store_true'
-        help='Used to enable nvprof profiling'
     )
     if len(sys.argv) == 1:
         parser.print_help()
