@@ -182,10 +182,10 @@ def train_model(args):
         training_stats.LogIterStats(cur_iter, lr)
 
         if cur_iter == cfg.SOLVER.MAX_ITER//2 and PROFILE:
-                print('Starting profiling for 100 iterations.')
+                print('Starting profiling for 30 iterations.')
                 cuda.profile_start()
 
-        if cur_iter == cfg.SOLVER.MAX_ITER//2+100 and PROFILE:
+        if cur_iter == cfg.SOLVER.MAX_ITER//2+30 and PROFILE:
                 print('Profiling completed, stopping profiling and continuing training.')
                 cuda.profile_stop()
         
